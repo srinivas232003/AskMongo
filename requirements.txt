@@ -1,0 +1,12 @@
+streamlit
+pymongo
+python-dotenv
+requests
+streamlit
+pymongo
+motor
+langchain
+python-dotenv
+requests
+pandas
+numpy
