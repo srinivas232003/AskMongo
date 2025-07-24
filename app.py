@@ -6,7 +6,7 @@ import re
 from bson.json_util import dumps
 from dotenv import load_dotenv
 import os
-from langchain_ollama import ChatOllama
+# from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 # ---- Setup ---- #
@@ -23,9 +23,9 @@ from langchain_core.messages import HumanMessage, SystemMessage
 import json
 llm = ChatGroq(model="llama3-70b-8192", api_key=os.getenv("GROQ_API_KEY"))
 # MongoDB setup
-client = pymongo.MongoClient(os.getenv("MONGODB_URI"))
-db = client["agriculture"]
-collection = db["crops"]
+# client = pymongo.MongoClient(os.getenv("MONGODB_URI"))
+# db = client["agriculture"]
+# collection = db["crops"]
 
 # Schema Description (condensed here for brevity)
 schema_description = """This table contains comprehensive information about a farmer's crop cycle.
@@ -207,9 +207,22 @@ import json
 ## -----------------
 ## Sidebar
 ## -----------------
+# Update the sidebar section with MongoDB URI input
 with st.sidebar:
     st.title("🌾 MongoDB Q&A Assistant")
     st.markdown("This assistant translates your questions into MongoDB Aggregation Pipelines and fetches the results.")
+    st.markdown("---")
+    
+    # Add MongoDB URI input section
+    st.markdown("### MongoDB Connection")
+    default_uri = ""
+    mongodb_uri = st.text_input(
+        "MongoDB URI",
+        value=default_uri,
+        type="password",  # Masks the URI for security
+        help="Enter your MongoDB connection string"
+    )
+    
     st.markdown("---")
     st.markdown("### Controls")
     if st.button("Clear Chat History", use_container_width=True):
@@ -217,6 +230,18 @@ with st.sidebar:
         st.rerun()
     st.markdown("---")
     st.info("💡 Tip: Ask 'What is the average yield for wheat by region?'")
+
+# Update MongoDB connection to use the user-provided URI
+try:
+    client = pymongo.MongoClient(mongodb_uri)
+    # Test the connection
+    client.admin.command('ping')
+    st.sidebar.success("✅ Connected to MongoDB")
+    db = client["agriculture"]
+    collection = db["crops"]
+except Exception as e:
+    st.sidebar.error(f"❌ Failed to connect to MongoDB: {str(e)}")
+    st.stop()  # Stop the app if connection fails
 
 ## -----------------
 ## App Initialization
